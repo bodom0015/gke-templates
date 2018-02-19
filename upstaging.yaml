@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: upstaging
+  labels:
+    app: upstaging
+spec:
+  # Create a static address with the "gcloud compute addresses" command
+  loadBalancerIP: "35.225.12.94"
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+  selector:
+    app: upstaging
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: upstaging
+spec:
+  replicas: 1
+  selector:
+    app: upstaging
+  template:
+    metadata:
+      name: upstaging
+      labels:
+        app: upstaging
+    spec:
+      containers:
+      - name: flask
+        image: bodom0015/upstaging
+        ports:
+        - containerPort: 8080
+          hostPort: 8080
+          protocol: TCP
+        env:
+        - name: HOSTNAME
+          value: "slambert.org"
+        - name: FLASK_DEBUG
+          value: "False"
+        - name: FLASK_ENABLE_TLS
+          value: "True"
+        - name: TLS_CRT_PATH
+          value: "upstaging.crt"
+        - name: TLS_KEY_PATH
+          value: "upstaging.key"
+        - name: MONGO_DATABASE
+          value: ""
+        - name: SMTP_SENDER
+          value: ""
+        - name: SMTP_USERNAME
+          value: ""
+        - name: SMTP_PASSWORD
+          value: ""
+        - name: JWT_SECRET
+          value: ""

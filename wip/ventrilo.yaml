@@ -1,0 +1,59 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ventrilo-tcp
+  labels:
+    app: ventrilo-tcp
+spec:
+  # Create a static address with the "gcloud compute addresses" command
+  loadBalancerIP: "35.225.12.94"
+  type: LoadBalancer
+  ports:
+  - name: tcp
+    port: 3784
+    targetPort: 3784
+    #nodePort: 30000
+    protocol: TCP
+  selector:
+    app: ventrilo
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ventrilo-udp
+  labels:
+    app: ventrilo-udp
+spec:
+  loadBalancerIP: "35.225.12.94"
+  type: LoadBalancer
+  ports:
+  - name: udp
+    port: 3784
+    targetPort: 3784
+    #nodePort: 30001
+    protocol: UDP
+  selector:
+    app: ventrilo
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: ventrilo
+spec:
+  replicas: 1
+  selector:
+    app: ventrilo
+  template:
+    metadata:
+      name: ventrilo
+      labels:
+        app: ventrilo
+    spec:
+      containers:
+      - name: ventrilo
+        image: akursar/ventrilo
+        ports:
+        - containerPort: 3784
+          protocol: TCP
+        - containerPort: 3784
+          protocol: UDP

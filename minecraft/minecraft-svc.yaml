@@ -1,0 +1,28 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: minecraft
+  labels:
+    app: minecraft
+spec:
+  # Create a static address with the "gcloud compute addresses" command
+  loadBalancerIP: "35.225.12.94"
+  type: LoadBalancer
+  ports:
+  - name: dynmap
+    port: 8123
+    targetPort: 8123
+    #nodePort: 30123
+    protocol: TCP
+  - name: server
+    port: 25565
+    targetPort: 25565
+    #nodePort: 30565
+    protocol: TCP
+  - name: rcon
+    port: 25575
+    targetPort: 25575
+    #nodePort: 30575
+    protocol: TCP
+  selector:
+    app: minecraft

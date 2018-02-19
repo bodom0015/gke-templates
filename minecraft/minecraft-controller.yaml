@@ -1,0 +1,64 @@
+---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: minecraft
+  labels:
+    app: minecraft
+spec:
+  replicas: 1
+  selector:
+    app: minecraft
+  template:
+    metadata:
+      labels:
+        app: minecraft
+    spec:
+      containers:
+      - name: minecraft
+        image: "ashdev/minecraft-spigot:1.12-alpine"
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/spigot_cmd.sh", "stop"]
+        ports: 
+        - name: dynmap
+          containerPort: 8123
+          hostPort: 8123
+          protocol: TCP
+        - name: server
+          containerPort: 25565
+          hostPort: 25565
+          protocol: TCP
+          #- name: rcon
+          #containerPort: 25575
+          #hostPort: 25575
+          #protocol: TCP
+        env:
+        - name: EULA
+          value: "TRUE"
+        - name: DYNMAP
+          value: "true"
+        - name: OPS
+          value: ""
+        - name: MOTD
+          value: "Now hosted on GKE"
+        - name: MODE
+          value: "survival"
+        - name: LEVEL
+          value: "moneytrees"
+        - name: CMDBLOCK
+          value: "true"
+        - name: MAXPLAYERS
+          value: "20"
+        - name: ONLINE
+          value: "false"
+        volumeMounts:
+            - name: minecraft-persistent-storage
+              mountPath: /minecraft
+      volumes:
+        - name: minecraft-persistent-storage
+          gcePersistentDisk:
+            pdName: minecraft-disk
+            fsType: ext4
+          
